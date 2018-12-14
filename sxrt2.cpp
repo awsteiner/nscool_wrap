@@ -30,7 +30,7 @@
 #include <mpi.h>
 #endif
 
-#include "../../nscool/nscool_wrap.h"
+#include "nscool_wrap.h"
 
 #include <o2scl/root_cern.h>
 #include <o2scl/mroot_hybrids.h>
@@ -571,7 +571,7 @@ protected:
 public:
 
   sxrt_class() : cu(o2scl_settings.get_convert_units()),
-		 nscool_wrap("../../nscool") {
+		 nscool_wrap("./") {
     no_cooling=false;
     out_file="sxrt.o2";
     mass=1.4;

@@ -628,6 +628,17 @@ class nscool_wrap {
 	      ("kg","1/fm",o2scl_mks::mass_muon),2.0);
   }
 
+  /* \brief Desc
+   */
+  /*
+  double cvelec(double t, double rho, double a, double z) {
+    electron.n=na*rho*z/a;
+    return 0.0;
+  }
+  */
+  
+  /** \brief Desc
+   */
   double cvion(double t, double rho, double a, double z) {
 
     double rhodrip=4.3e11;
@@ -653,10 +664,10 @@ class nscool_wrap {
       return 1.5*nionkb;
     } else if (gamma<=0.2) {
       double cv1=1.5*nionkb;
-      double cv2=noinkb*(0.75*bcv*gamma14+1.25*ccv/gamma14+dcv+1.5);
+      double cv2=nionkb*(0.75*bcv*gamma14+1.25*ccv/gamma14+dcv+1.5);
       return (gamma-0.1)/0.1*cv2+(0.2-gamma)/0.1*cv1;
     } else if (gamma<178.0) {
-      return noinkb*(0.75*bcv*gamma14+1.25*ccv/gamma14+dcv+1.5);
+      return nionkb*(0.75*bcv*gamma14+1.25*ccv/gamma14+dcv+1.5);
     } else if (gamma<=210.0 && delta>=1.0e19) {
       double cv1=nionkb*(1.5+3.0*hcv/gamma/gamma+1.5);
       cv0[0]=1.5+3.0*hcv/gamma/gamma+1.5;
@@ -666,7 +677,7 @@ class nscool_wrap {
 	exit(-1);
       }
       double cv2=nionkb*(cv0[i1]+(delta*2.0e-20-i1)*(cv0[i1+1]-cv0[i1]));
-      return (gamma-178.0)/32.0*cv2+(210.0-gamma)/32.0
+      return (gamma-178.0)/32.0*cv2+(210.0-gamma)/32.0;
     } else if (delta<=1.0e19) {
       return nionkb*(1.5+3.0*hcv/gamma/gamma+1.5);
     } else if (delta>1.0e9 && delta<7.0e20) {
@@ -678,7 +689,7 @@ class nscool_wrap {
       }
       return nionkb*(cv0[i1]+(delta*2.0e-20-i1)*(cv0[i1+1]-cv0[i1]));
     }
-    double delt1=delta*1.0e-20;
+    double delta1=delta*1.0e-20;
     return nionkb*cte/delta1/delta1/delta1;
   }
 

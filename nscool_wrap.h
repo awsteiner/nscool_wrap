@@ -517,7 +517,7 @@ class nscool_wrap {
     }
 #endif
 
-    if (false) {
+    if (true) {
       std::cout << "In nscool_wrap, rank " << mpi_rank
 		<< " reading data files." << std::endl;
     }
@@ -1609,6 +1609,11 @@ class nscool_wrap {
       \todo Document in what cases <tt>iret</tt> can be nonzero
   */
   virtual int run(int irank) {
+    if (nscool_wrap_ptrs.size()==0) {
+      std::cerr << "Object 'nscool_wrap_ptrs' is empty." << std::endl;
+      exit(-1);
+    }
+    std::cout << "Iere: " << nscool_wrap_ptrs.size() << std::endl;
     if (v_time.size()>0) {
       v_time.clear();
       v_tptr.clear();
@@ -1618,9 +1623,10 @@ class nscool_wrap {
     }
     int iret=0;
     // nscool_ is a subroutine and thus has no return value
+    std::cout << "Iere2." << std::endl;
     nscool_(&irank,&iret,pb_logt,pb_nalpha,pb_n2,
 	    sf_lgtau1,sf_lgtau2,sf_lgr,sf_lgr2);
-    
+    std::cout << "Iere3." << std::endl;
     return iret;
   }
 

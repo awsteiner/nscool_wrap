@@ -591,7 +591,8 @@ public:
     mpi_rank=0;
     mpi_nprocs=1;
     max_time=8*3600-600;
-    schwarz_km=o2scl_mks::schwarzchild_radius/1.0e3;    
+    schwarz_km=o2scl_mks::schwarzchild_radius/1.0e3;
+    std::cout << "Here." << std::endl;
   }
 
   /** \brief Run the MCMC
@@ -1146,7 +1147,9 @@ protected:
   int match_lum(size_t nv, const ubvector &x, ubvector &y) {
     double logT=x[0];
     double lphot, lneut, lheat;
+    std::cout << "ml1." << std::endl;
     int ret=acc_compute(logT,lphot,lneut,lheat);
+    std::cout << "ml2." << std::endl;
     y[0]=(lphot+lneut-lheat)/lheat;
     return ret;
   }
@@ -1157,7 +1160,9 @@ protected:
   int acc_compute(double logT, double &lphot, double &lneut,
 		  double &lheat) {
     acc_Tinit=pow(10.0,logT);
+    std::cout << "run1." << std::endl;
     int ret=run(0);
+    std::cout << "run2." << std::endl;
     if (ret!=0) {
       cout << "Failed in acc_compute()." << endl;
       if (err_nonconv) {
@@ -2014,17 +2019,36 @@ public:
    */
   int steady_state_one(std::vector<std::string> &sv, bool itive_com) {
 
+    sfn1s0=1;
+    sfp1s0=150;
+    sfn3p2=150;
+    n3_tc=1.055e9;
+    n3_kf=1.88628;
+    n3_dk=0.486867;
+    p1_tc=4.99188e9;
+    p1_kf=1.22489;
+    p1_dk=0.53767;
+    
     no_cooling=true;
     time_print[0]=1.1e-12;
     ptemp=1.0;
+
+    if (sv.size()<2) {
+      cerr << "Need Mdot." << endl;
+			      return 2;
+    }
     
     double logT=logT_init;
     double Mdot=o2scl::stod(sv[1]);
+    cout << "H1." << endl;
     solve(Mdot,logT);
     double lphot,lneut,lheat;
+    cout << "H2." << endl;
     acc_compute(logT,lphot,lneut,lheat);
+    cout << "H3." << endl;
 
     write_tl_prof();
+    cout << "H4." << endl;
 
     hdf_file hf;
     hf.open("tl_prof.o2");
@@ -2033,6 +2057,7 @@ public:
     hdf_input(hf,tl_prof2,name);
     hf.close();
 
+    cout << "H5." << endl;
     cout << Mdot << " " << pow(10.0,logT) << " "
 	 << lphot << " " << lneut << " " << lheat << endl;
     

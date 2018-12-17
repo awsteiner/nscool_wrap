@@ -592,7 +592,6 @@ public:
     mpi_nprocs=1;
     max_time=8*3600-600;
     schwarz_km=o2scl_mks::schwarzchild_radius/1.0e3;
-    std::cout << "Here." << std::endl;
   }
 
   /** \brief Run the MCMC
@@ -1147,9 +1146,7 @@ protected:
   int match_lum(size_t nv, const ubvector &x, ubvector &y) {
     double logT=x[0];
     double lphot, lneut, lheat;
-    std::cout << "ml1." << std::endl;
     int ret=acc_compute(logT,lphot,lneut,lheat);
-    std::cout << "ml2." << std::endl;
     y[0]=(lphot+lneut-lheat)/lheat;
     return ret;
   }
@@ -1160,9 +1157,7 @@ protected:
   int acc_compute(double logT, double &lphot, double &lneut,
 		  double &lheat) {
     acc_Tinit=pow(10.0,logT);
-    std::cout << "run1." << std::endl;
     int ret=run(0);
-    std::cout << "run2." << std::endl;
     if (ret!=0) {
       cout << "Failed in acc_compute()." << endl;
       if (err_nonconv) {
@@ -2040,10 +2035,8 @@ public:
     
     double logT=logT_init;
     double Mdot=o2scl::stod(sv[1]);
-    cout << "H1." << endl;
     solve(Mdot,logT);
     double lphot,lneut,lheat;
-    cout << "H2." << endl;
     acc_compute(logT,lphot,lneut,lheat);
     cout << "H3." << endl;
 

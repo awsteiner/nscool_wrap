@@ -32,7 +32,9 @@
 #include <o2scl/hdf_io.h>
 #include <o2scl/eos_had_base.h>
 #include <o2scl/nstar_cold.h>
+#include <o2scl/fermion_eff.h>
 #include <o2scl/permutation.h>
+#include <o2scl/lib_settings.h>
 
 #include "emissivities.h"
 #include "tc.h"
@@ -497,6 +499,18 @@ class nscool_wrap {
    */
   double ptemp;
 
+  /** Brief Electron
+   */
+  o2scl::fermion electron;
+
+  /** Brief Muon
+   */
+  o2scl::fermion muon;
+
+  /** Brief Fermion thermodynamics
+   */
+  o2scl::fermion_eff fe; 
+  
   nscool_wrap(std::string dir) {
     o2scl_hdf::hdf_file hf;
     std::string name;
@@ -517,7 +531,7 @@ class nscool_wrap {
     }
 #endif
 
-    if (true) {
+    if (false) {
       std::cout << "In nscool_wrap, rank " << mpi_rank
 		<< " reading data files." << std::endl;
     }
@@ -607,8 +621,20 @@ class nscool_wrap {
     int sf_n2=35;
     spline2_(sf_lgtau1,sf_lgtau2,sf_lgr,&sf_n1,&sf_n2,sf_lgr2);
     
+    // Lepton inits
+    electron.init(o2scl::o2scl_settings.get_convert_units().convert
+		  ("kg","1/fm",o2scl_mks::mass_electron),2.0);
+    muon.init(o2scl::o2scl_settings.get_convert_units().convert
+	      ("kg","1/fm",o2scl_mks::mass_muon),2.0);
   }
-    
+
+  void P_electron(double ne, double T, double *pre) {
+    electron.n=ne;
+    fe.calc_density(electron,T);
+    *pre=electron.pr;
+    return;
+  }
+  
   /** \brief Load the default star, APR with M=1.4
    */
   void default_star(std::string dir=".") {
@@ -1613,7 +1639,6 @@ class nscool_wrap {
       std::cerr << "Object 'nscool_wrap_ptrs' is empty." << std::endl;
       exit(-1);
     }
-    std::cout << "Iere: " << nscool_wrap_ptrs.size() << std::endl;
     if (v_time.size()>0) {
       v_time.clear();
       v_tptr.clear();
@@ -1623,10 +1648,8 @@ class nscool_wrap {
     }
     int iret=0;
     // nscool_ is a subroutine and thus has no return value
-    std::cout << "Iere2." << std::endl;
     nscool_(&irank,&iret,pb_logt,pb_nalpha,pb_n2,
 	    sf_lgtau1,sf_lgtau2,sf_lgr,sf_lgr2);
-    std::cout << "Iere3." << std::endl;
     return iret;
   }
 
@@ -1737,8 +1760,10 @@ class nscool_wrap {
       }
 
       tl_prof2.set_interp_type(o2scl::itp_nearest_neigh);
+      std::cout << "Herex." << std::endl;
       o2scl::table3d t3dug=tl_prof2.slice_to_uniform_grid
 	("qmax",100,false,100,true);
+      std::cout << "Herex2." << std::endl;
       tl_prof2.set_interp_type(o2scl::itp_linear);
       t3dug.set_interp_type(o2scl::itp_linear);
       for(size_t k=0;k<tl_prof2.get_nslices();k++) {
@@ -1998,5 +2023,10 @@ extern "C" void nscool_tc_new_(int *irank, int *imax, int *idrip, int *icore,
   return;
 }
 
+extern "C" void nscool_P_electron_(int *irank, double *ne, double *T,
+				   double *pre) {
+  nscool_wrap_ptrs[*irank]->P_electron(*ne,*T,pre);
+  return;
+}
 
 #endif

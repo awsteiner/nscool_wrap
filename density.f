@@ -34,7 +34,6 @@ c **** sept 1991 version, checked on sept 2
         me=9.109d-28
         pi=3.141592653d0
 C **** Calculate the electron density and ionization
-c        call n_electron(T,rho,A,Z,ne)
         ne=Rho*NA*Z/A
         nion=Rho*NA/A
         Zeff=ne/nion
@@ -170,87 +169,4 @@ C *****  Calculate pressure
 C*********************************************************************
 C*********************************************************************
 C*********************************************************************
-
-      SUBROUTINE N_ELECTRON(TEMPERATURE,DENSITY,A,Z,NE)
-
-C ******************************************************************C
-C     TEMPERATURE in K  DENSITY in gm/cm3  NE in #/cm3              C
-C*******************************************************************C
-C              CHECKED ON AUGUST 30 1991                            C
-C ******************************************************************C
-
-      IMPLICIT REAL*8(A-H,K-Z)
-      INTEGER A,Z
-      CHARACTER*80 FILENAME
-
-      PARAMETER (ITEMP=50,JRHO=50,EV=11604.)
-
-      DIMENSION TEMP(0:ITEMP),RHO(0:JRHO),NELECT(0:ITEMP,0:JRHO)
-
-C ****** Read Electron Density Table *********************************
-
-      IF (READ.EQ.1.) GOTO 1234
-      FILENAME='[USER.DPAGE.NSTAR.LOSALAMOS]NELECT.DAT'
-      OPEN(UNIT=40,FILE=FILENAME,STATUS='OLD')
-       DO JUNK=1,6
-        READ(40,*)
-       END DO
-       DO I=0,ITEMP
-        READ(40,*)
-        DO J=0,JRHO
-         READ(40,*)TEMP(I),RHO(J),NELECT(I,J)
-        END DO
-       END DO
-      CLOSE(UNIT=40,STATUS='KEEP')
-
-      READ=1.
-
-1234  CONTINUE
-
-C *******************************************************************
-
-      T=TEMPERATURE/EV
-      LT=LOG10(T)
-      LR=LOG10(DENSITY)
-
-      IF ((LT.GT.5.).OR.(LR.GT.5.)) THEN
-       REAL_A=A
-       REAL_Z=Z
-       NE=REAL_Z/REAL_A*6.022E23*DENSITY
-       RETURN
-      END IF
-
-      IF (LT.LE.0.01) THEN
-       IT=0
-      ELSE IF (LT.GE.4.99) THEN
-       IT=ITEMP-1
-      ELSE
-       IT=10*LT
-      END IF
-
-      IF (LR.LE.-4.99) THEN 
-       JR=0
-      ELSE IF (LR.GE.4.99) THEN
-       JR=JRHO-1
-      ELSE
-       JR=5*(5+LR)
-      END IF
-
-      DELTEMP=LOG10(TEMP(IT+1)/TEMP(IT))
-      WI1=LOG10(TEMP(IT+1)/T)/DELTEMP
-      WI2=1.-WI1
-      DELRHO=LOG10(RHO(JR+1)/RHO(JR))
-      WJ1=LOG10(RHO(JR+1)/DENSITY)/DELRHO
-      WJ2=1.-WJ1
-
-      LNE=WI1*WJ1*LOG10(NELECT(IT,JR))+
-     1    WI1*WJ2*LOG10(NELECT(IT,JR+1))+
-     2    WI2*WJ1*LOG10(NELECT(IT+1,JR))+
-     3    WI2*WJ2*LOG10(NELECT(IT+1,JR+1))
-
-      NE=10.**LNE
-
-      RETURN
-
-      END
 

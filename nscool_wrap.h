@@ -33,6 +33,7 @@
 #include <o2scl/eos_had_base.h>
 #include <o2scl/nstar_cold.h>
 #include <o2scl/fermion_eff.h>
+#include <o2scl/fermion_deriv_rel.h>
 #include <o2scl/permutation.h>
 #include <o2scl/lib_settings.h>
 
@@ -503,6 +504,10 @@ class nscool_wrap {
    */
   o2scl::fermion electron;
 
+  /** Brief Electron with derivatives
+   */
+  o2scl::fermion_deriv electron_deriv;
+
   /** Brief Muon
    */
   o2scl::fermion muon;
@@ -510,6 +515,10 @@ class nscool_wrap {
   /** Brief Fermion thermodynamics
    */
   o2scl::fermion_eff fe; 
+  
+  /** Brief Fermion thermodynamics with derivatives
+   */
+  o2scl::fermion_deriv_rel fdr; 
   
   nscool_wrap(std::string dir) {
     o2scl_hdf::hdf_file hf;
@@ -624,19 +633,41 @@ class nscool_wrap {
     // Lepton inits
     electron.init(o2scl::o2scl_settings.get_convert_units().convert
 		  ("kg","1/fm",o2scl_mks::mass_electron),2.0);
+    electron_deriv.init(o2scl::o2scl_settings.get_convert_units().convert
+			("kg","1/fm",o2scl_mks::mass_electron),2.0);
     muon.init(o2scl::o2scl_settings.get_convert_units().convert
 	      ("kg","1/fm",o2scl_mks::mass_muon),2.0);
   }
 
-  /* \brief Desc
+  /** \brief Desc
    */
-  /*
   double cvelec(double t, double rho, double a, double z) {
-    electron.n=na*rho*z/a;
-    return 0.0;
+    double hb=1.054588e-27;
+    double kb=1.380662e-16;
+    double c=2.997924e10;
+    double na=6.022045e23;
+    double me=9.109e-28;
+    double pi=3.14159265;
+    
+    double ne=na*rho*z/a;
+    double pf=hb*cbrt(3.0*pi*pi*ne);
+    double ef=sqrt((me*me*c*c*c*c)+(pf*c*c))-me*c*c;
+    double tf=ef/kb;
+    double xe=pf/(me*c);
+    double ae=xe*xe/sqrt(1.+xe*xe);
+    double cvt=ne*kb*kb*pi*pi/(me*c*c)/ae;
+    
+    double t0=tf/50.0;
+    
+    if (t<0.5*t0) {
+      return cvt*t;
+    }
+
+    electron_deriv.n=ne;
+    fdr.calc_density(electron_deriv,t);
+    return electron_deriv.dsdT;
   }
-  */
-  
+
   /** \brief Desc
    */
   double cvion(double t, double rho, double a, double z) {

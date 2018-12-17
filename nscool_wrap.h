@@ -628,10 +628,109 @@ class nscool_wrap {
 	      ("kg","1/fm",o2scl_mks::mass_muon),2.0);
   }
 
-  void P_electron(double ne, double T, double *pre) {
+  double cvion(double t, double rho, double a, double z) {
+
+    double rhodrip=4.3e11;
+    double bcv=0.95043;
+    double ccv=0.18956;
+    double dcv=-0.81487;
+    double hcv=3225.0;
+    double cte=141.7;
+    double cv0[15]={0.0,2.956,2.829,2.633,2.389,2.118,1.840,1.572,
+		    1.323,1.102,0.909,0.745,0.609,0.496,0.404};
+    
+    double gamma=2.273e5*z*z*cbrt(rho/a)/t;
+    double gamma14=pow(gamma,0.25);
+    double a1;
+    if (rho>=rhodrip) {
+      a1=3.0*z;
+    } else {
+      a1=a;
+    }
+    double nionkb=1.38e-16*6.022e23*rho/a;
+    double delta=1.0/t*z*sqrt(rho/(a1*a))*6.022e23;
+    if (gamma<=0.1) {
+      return 1.5*nionkb;
+    } else if (gamma<=0.2) {
+      double cv1=1.5*nionkb;
+      double cv2=noinkb*(0.75*bcv*gamma14+1.25*ccv/gamma14+dcv+1.5);
+      return (gamma-0.1)/0.1*cv2+(0.2-gamma)/0.1*cv1;
+    } else if (gamma<178.0) {
+      return noinkb*(0.75*bcv*gamma14+1.25*ccv/gamma14+dcv+1.5);
+    } else if (gamma<=210.0 && delta>=1.0e19) {
+      double cv1=nionkb*(1.5+3.0*hcv/gamma/gamma+1.5);
+      cv0[0]=1.5+3.0*hcv/gamma/gamma+1.5;
+      int i1=((int)(delta*2.0e-20));
+      if (i1>14 || i1<0) {
+	std::cerr << "cvion failure." << std::endl;
+	exit(-1);
+      }
+      double cv2=nionkb*(cv0[i1]+(delta*2.0e-20-i1)*(cv0[i1+1]-cv0[i1]));
+      return (gamma-178.0)/32.0*cv2+(210.0-gamma)/32.0
+    } else if (delta<=1.0e19) {
+      return nionkb*(1.5+3.0*hcv/gamma/gamma+1.5);
+    } else if (delta>1.0e9 && delta<7.0e20) {
+      cv0[0]=1.5+3.0*hcv/gamma/gamma+1.5;
+      int i1=((int)(delta*2.0e-20));
+      if (i1>14 || i1<0) {
+	std::cerr << "cvion failure." << std::endl;
+	exit(-1);
+      }
+      return nionkb*(cv0[i1]+(delta*2.0e-20-i1)*(cv0[i1+1]-cv0[i1]));
+    }
+    double delt1=delta*1.0e-20;
+    return nionkb*cte/delta1/delta1/delta1;
+  }
+
+  /** \brief Desc
+   */
+  double pressure(double T, double Rho, double A, double Z) {
+    double hb=1.054588e-27;
+    double kb=1.380662e-16;
+    double c=2.997924e10;
+    double NA=6.022045e23;
+    double me=9.109e-28;
+    double pi=3.141592653;
+
+    double ne=Rho*NA*Z/A;
+    double nion=Rho*NA/A;
+    double Zeff=ne/nion;
+    double gamma=2.273e5*Zeff*Zeff*cbrt(Rho/A)/T;
+    double Uion;
+    double gamma14=pow(gamma,0.25);
+    if (gamma<210.0) {
+      Uion=1.5-0.895929*gamma+3225.0*gamma14;
+    } else {
+      Uion=-0.897744*gamma+0.95043*gamma14+
+	0.18956/gamma14-0.81487;
+    }
+    double Pion=nion*kb*T*(1.0+Uion/3.0);
+    
     electron.n=ne;
+    electron.m=me;
     fe.calc_density(electron,T);
-    *pre=electron.pr;
+    double Pel=electron.pr;
+    
+    return Pel+Pion;
+  }
+  
+  /** \brief Desc
+   */
+  void density(double T, double P, double A, double Z, double &Rho) {
+
+    double eps=1.0e-3;
+    double dRho;
+    do {
+      double Rho0=Rho;
+      double Pre0=pressure(T,Rho0,A,Z);
+      double Rho1=(1.0+eps)*Rho0;
+      double Pre1=pressure(T,Rho1,A,Z);
+      double f=Pre0-P;
+      double f1=(Pre1-Pre0)/(Rho1-Rho0);
+      dRho=-f/f1;
+      Rho=Rho0+dRho;
+    } while (fabs(dRho/Rho)>=1.0e-5);
+    
     return;
   }
   
@@ -2023,9 +2122,9 @@ extern "C" void nscool_tc_new_(int *irank, int *imax, int *idrip, int *icore,
   return;
 }
 
-extern "C" void nscool_P_electron_(int *irank, double *ne, double *T,
-				   double *pre) {
-  nscool_wrap_ptrs[*irank]->P_electron(*ne,*T,pre);
+extern "C" void nscool_density_(int *irank, double *T, double *P,
+				double *A, double *Z, double *Rho) {
+  nscool_wrap_ptrs[*irank]->density(*T,*P,*A,*Z,*Rho);
   return;
 }
 

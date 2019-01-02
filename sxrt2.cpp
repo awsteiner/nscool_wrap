@@ -147,6 +147,7 @@ protected:
   
   /// Table for output
   table_units<> at;
+  
   /// HDF file for output
   hdf_file hf;
 
@@ -570,8 +571,8 @@ protected:
 
 public:
 
-  sxrt_class() : cu(o2scl_settings.get_convert_units()),
-		 nscool_wrap("./") {
+  sxrt_class() : nscool_wrap("./"),
+		 cu(o2scl_settings.get_convert_units()) {
     no_cooling=false;
     out_file="sxrt.o2";
     mass=1.4;
@@ -814,7 +815,7 @@ public:
     }
     if (p1_dk>p1_kf) {
       if (mpi_nprocs==1) {
-      cout << "Proton SC dk too large." << endl;
+	cout << "Proton SC dk too large." << endl;
       }
       return 8;
     }
@@ -831,7 +832,7 @@ public:
     // saturation
     if (nb_durca*(1.0-alpha_durca)<0.16) {
       if (mpi_nprocs==1) {
-      cout << "Urca density too small" << endl;
+	cout << "Urca density too small" << endl;
       }
       return 3;
     }
@@ -845,13 +846,13 @@ public:
     mass=mass_1808;
 
     sv[0]="eos";
-    sv[1]="hhj";
-    //sv[1]="skyrme";
-    //sv[2]="SLy4";
+    //sv[1]="hhj";
+    sv[1]="skyrme";
+    sv[2]="SLy4";
     int ret=eos(sv,false);
     if (ret!=0) {
       if (mpi_nprocs==1) {
-      cout << "EOS function failed." << endl;
+	cout << "EOS function failed." << endl;
       }
       return 9;
     }
@@ -866,21 +867,21 @@ public:
     // Check that masses are less than maximum
     if (mass_1808>ns_M_max || mass_AqX1>ns_M_max) {
       if (mpi_nprocs==1) {
-      cout << "Mass greater than maximum." << endl;
+	cout << "Mass greater than maximum." << endl;
       }
       return 2;
     }
     // Check for causality
     if (ns_nb_max>nc.acausal) {
       if (mpi_nprocs==1) {
-      cout << "EOS acausal." << endl;
+	cout << "EOS acausal." << endl;
       }
       return 1;
     }
 
     if (p1_kf<cbrt(3.0*o2scl_const::pi2*ns_np_sat)) {
       if (mpi_nprocs==1) {
-      cout << "Proton SC kf smaller than saturation in 1808." << endl;
+	cout << "Proton SC kf smaller than saturation in 1808." << endl;
       }
       return 4;
     }
@@ -888,7 +889,7 @@ public:
     if (n3_kf>cbrt(3.0*o2scl_const::pi2*ns_nn_max)) {
       if (mpi_nprocs==1) {
 	cout << "Neutron SF kf greater than max for 1808: " << n3_kf << " "
-	   << ns_nn_max << endl;
+	     << ns_nn_max << endl;
       }
       return 5;
     }
@@ -910,7 +911,7 @@ public:
       int ret1=solve(Mdot,logT_1808);
       if (ret1!=0) {
 	if (mpi_nprocs==1) {
-	cout << "Solver failed for 1808." << endl;
+	  cout << "Solver failed for 1808." << endl;
 	}
 	return 14;
       }
@@ -928,29 +929,29 @@ public:
     eos(sv,false);
     if (ret!=0) {
       if (mpi_nprocs==1) {
-      cout << "EOS function failed." << endl;
+	cout << "EOS function failed." << endl;
       }
       return 9;
     }
 
     if (p1_kf<cbrt(3.0*o2scl_const::pi2*ns_np_sat)) {
       if (mpi_nprocs==1) {
-      cout << "Proton SC kf smaller than saturation in AqX1." << endl;
+	cout << "Proton SC kf smaller than saturation in AqX1." << endl;
       }
       return 11;
     }
     if (n3_kf>cbrt(3.0*o2scl_const::pi2*ns_nn_max)) {
       if (mpi_nprocs==1) {
-      cout << "Neutron SF kf greater than max for AqX1: " << n3_kf << " "
-	   << ns_nn_max << endl;
-	}
+	cout << "Neutron SF kf greater than max for AqX1: " << n3_kf << " "
+	     << ns_nn_max << endl;
+      }
       return 12;
     }
     if (p1_kf>cbrt(3.0*o2scl_const::pi2*ns_np_max)) {
       if (mpi_nprocs==1) {
-      cout << "Proton SC kf greater than max for AqX1: " << p1_kf << " "
-	   << ns_np_max << endl;
-	}
+	cout << "Proton SC kf greater than max for AqX1: " << p1_kf << " "
+	     << ns_np_max << endl;
+      }
       return 13;
     }
 
@@ -963,7 +964,7 @@ public:
       int ret2=solve(Mdot,logT_AqX1);
       if (ret2!=0) {
 	if (mpi_nprocs==1) {
-	cout << "Solver failed for AqX1." << endl;
+	  cout << "Solver failed for AqX1." << endl;
 	}
 	return 15;
       }
@@ -1104,10 +1105,10 @@ protected:
     acc_Mdot=Mdot;
     mroot_hybrids<> mh;
     mm_funct func=std::bind(std::mem_fn<int(size_t,const ubvector &,
-					      ubvector &)>
-			      (&sxrt_class::match_lum),this,
-			      std::placeholders::_1,std::placeholders::_2,
-			      std::placeholders::_3);
+					    ubvector &)>
+			    (&sxrt_class::match_lum),this,
+			    std::placeholders::_1,std::placeholders::_2,
+			    std::placeholders::_3);
     ubvector x(1), y(1);
     x[0]=logT;
     // Ignore solver convergence errors
@@ -1376,6 +1377,7 @@ public:
       // Clear table for new columns
       nscool_core.clear_table();
       nscool_core.line_of_names("Rho Press nbar Ye Ymu Yn Yp mstp mstn");
+      nscool_core.line_of_names("Yla Ysm Ys0 Ysp mstla mstsm msts0 mstsp");
       
       // Baryon density grid
       double nb_min=0.09;
@@ -1390,16 +1392,17 @@ public:
 	double Ymu=0.0;
 	//if (nc_eos->is_column("nmu")) nc_eos->interp("nb",nb,"nmu")/nb;
 	//if (Ymu<0.0) Ymu=0.0;
-	double line[9]={cu.convert("1/fm^4","g/cm^3",
-				   nc_eos->interp("nb",nb,"ed")),
-			cu.convert("1/fm^4","dyne/cm^2",
-				   nc_eos->interp("nb",nb,"pr")),nb,
-			nc_eos->interp("nb",nb,"ne")/nb,
-			Ymu,
-			nc_eos->interp("nb",nb,"nn")/nb,
-			nc_eos->interp("nb",nb,"np")/nb,
-			n.ms/n.m,p.ms/p.m};
-	nscool_core.line_of_data(9,line);
+	double line[17]={cu.convert("1/fm^4","g/cm^3",
+				    nc_eos->interp("nb",nb,"ed")),
+			 cu.convert("1/fm^4","dyne/cm^2",
+				    nc_eos->interp("nb",nb,"pr")),nb,
+			 nc_eos->interp("nb",nb,"ne")/nb,
+			 Ymu,
+			 nc_eos->interp("nb",nb,"nn")/nb,
+			 nc_eos->interp("nb",nb,"np")/nb,
+			 n.ms/n.m,p.ms/p.m,
+			 0.0,0.0,0.0,0.0,1.0,1.0,1.0,1.0};
+	nscool_core.line_of_data(17,line);
       }
       
       if (make_tables) {
@@ -2030,7 +2033,7 @@ public:
 
     if (sv.size()<2) {
       cerr << "Need Mdot." << endl;
-			      return 2;
+      return 2;
     }
     
     double logT=logT_init;
@@ -2136,7 +2139,9 @@ public:
     no_cooling=false;
 
     // Run the cooling code
+    cout << "Here4." << endl;
     run(0);
+    cout << "Here4b." << endl;
     
     write_cool_curve();
     write_tl_prof();

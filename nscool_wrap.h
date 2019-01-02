@@ -1901,10 +1901,8 @@ class nscool_wrap {
       }
 
       tl_prof2.set_interp_type(o2scl::itp_nearest_neigh);
-      std::cout << "Herex." << std::endl;
       o2scl::table3d t3dug=tl_prof2.slice_to_uniform_grid
 	("qmax",100,false,100,true);
-      std::cout << "Herex2." << std::endl;
       tl_prof2.set_interp_type(o2scl::itp_linear);
       t3dug.set_interp_type(o2scl::itp_linear);
       for(size_t k=0;k<tl_prof2.get_nslices();k++) {

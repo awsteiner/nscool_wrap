@@ -1,7 +1,7 @@
 /*
   -------------------------------------------------------------------
   
-  Copyright (C) 2015-2018, Andrew W. Steiner and Sophia Han
+  Copyright (C) 2015-2019, Andrew W. Steiner and Sophia Han
   
   This file is part of nscool_wrap.
   

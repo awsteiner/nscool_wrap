@@ -1,0 +1,12 @@
+Crust cooling function depends on:
+1. Q_{imp} (*)
+2. Singlet neutron superfluidity
+3. EOS
+4. T_{core}
+5. shallow heating (depth and amount)
+6. Light elements in envelope/ocean
+7. Accretion rate history
+8. How and when the accretion outburst ended
+9. The properties of the pasta (*)
+
+(*) = possibly not independent of the others

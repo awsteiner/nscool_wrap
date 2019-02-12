@@ -14,12 +14,16 @@ Crust cooling function depends on
 
 Source list
 -----------
-KS 1731-260
-MAXI J0556
-MXB 1659-29
-EXO 0748
-Aql X-1
+List from Homan et al. 2014
 
+IGR J17480-2446 
+XTE J1701-462
+KS 1731-260
+MAXI J0556-332
+MXB 1659-29
+EXO 0748-676
+
+Aql X-1
 GS 1608
 Terzan 5
 

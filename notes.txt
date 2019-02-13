@@ -12,6 +12,21 @@ Crust cooling function depends on
 
 (*) = possibly not independent of the others
 
+Changes that require more computation
+-------------------------------------
+* EOS
+* superfluidity
+* atmosphere
+
+Initial data
+------------
+EOS
+crust composition
+C_{V,core}(T)
+L_{nu,core}(T)
+M_core
+R_core
+
 Source list
 -----------
 List from Homan et al. 2014
